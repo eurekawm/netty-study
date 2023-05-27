@@ -6,12 +6,11 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class MyServer {
 
-    private static final Logger log = LoggerFactory.getLogger(MyServer.class);
 
     public static void main(String[] args) {
         log.debug("SERVER START-------");

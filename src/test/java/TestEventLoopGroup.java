@@ -2,6 +2,7 @@ import io.netty.channel.DefaultEventLoop;
 import io.netty.channel.EventLoop;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.GenericFutureListener;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -56,8 +57,19 @@ public class TestEventLoopGroup {
     }
 
     @Test
-    public void testPromise() {
+    public void testPromise() throws ExecutionException, InterruptedException {
         EventLoop next = new DefaultEventLoop().next();
-        new DefaultEventLoop()
+        DefaultPromise<Integer> promise = new DefaultPromise<>(next);
+        new Thread(()->{
+            logger.debug("异步处理");
+            try {
+                TimeUnit.SECONDS.sleep(10);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            promise.setSuccess(10);
+        }).start();
+        logger.debug("等待异步处理的结果");
+        logger.debug("结果是{}", promise.get());
     }
 }
