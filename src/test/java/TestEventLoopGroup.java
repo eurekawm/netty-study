@@ -1,3 +1,5 @@
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.channel.EventLoop;
 import io.netty.channel.EventLoopGroup;
@@ -71,5 +73,12 @@ public class TestEventLoopGroup {
         }).start();
         logger.debug("等待异步处理的结果");
         logger.debug("结果是{}", promise.get());
+    }
+
+    @Test
+    public void testByteBuf(){
+        ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer();
+        ByteBuf byteBuf = ByteBufAllocator.DEFAULT.directBuffer();
+        ByteBuf heapBuffer = ByteBufAllocator.DEFAULT.heapBuffer();
     }
 }
