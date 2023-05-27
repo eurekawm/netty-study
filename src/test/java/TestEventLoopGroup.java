@@ -1,3 +1,5 @@
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.channel.EventLoop;
 import io.netty.channel.EventLoopGroup;
@@ -58,6 +60,12 @@ public class TestEventLoopGroup {
     @Test
     public void testPromise() {
         EventLoop next = new DefaultEventLoop().next();
-        new DefaultEventLoop()
+    }
+
+    @Test
+    public void testByteBuf(){
+        ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer();
+        ByteBuf byteBuf = ByteBufAllocator.DEFAULT.directBuffer();
+        ByteBuf heapBuffer = ByteBufAllocator.DEFAULT.heapBuffer();
     }
 }
