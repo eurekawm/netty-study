@@ -6,17 +6,31 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LoggingHandler;
+import lombok.extern.slf4j.Slf4j;
+import netty.zhyf.codec.ChatByteToMessageDecoder;
+import netty.zhyf.codec.ChatMessageToByteEncoder;
+import netty.zhyf.message.ChatRequestMessage;
+import netty.zhyf.message.LoginRequestMessage;
+import netty.zhyf.message.Message;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
 
+@Slf4j
 public class MyClient {
     private static final Logger logger = LoggerFactory.getLogger(MyClient.class);
 
     public static void main(String[] args) {
         NioEventLoopGroup group = new NioEventLoopGroup();
         LoggingHandler loggingHandler = new LoggingHandler();
+        ChatMessageToByteEncoder chatMessageToByteEncoder = new ChatMessageToByteEncoder();
+        ChatByteToMessageDecoder chatByteToMessageDecoder = new ChatByteToMessageDecoder();
+        Scanner scanner = new Scanner(System.in);
+        CountDownLatch waitLogin = new CountDownLatch(1);
         try {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.channel(NioSocketChannel.class);
@@ -25,8 +39,34 @@ public class MyClient {
             bootstrap.handler(new ChannelInitializer<NioSocketChannel>() {
                 @Override
                 protected void initChannel(NioSocketChannel ch) throws Exception {
-                    ch.pipeline().addLast(new StringEncoder());
                     ch.pipeline().addLast(loggingHandler);
+                    ch.pipeline().addLast(chatMessageToByteEncoder);
+                    ch.pipeline().addLast(chatByteToMessageDecoder);
+                    ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
+                        @Override
+                        public void channelActive(ChannelHandlerContext ctx) throws Exception {
+                            new Thread(() -> {
+                                System.out.println("请输入用户名");
+                                String usernanme = scanner.nextLine();
+                                System.out.println("请输入密码");
+                                String password = scanner.nextLine();
+                                // 发送登录操作
+                                LoginRequestMessage loginRequestMessage = new LoginRequestMessage(usernanme, password);
+                                ctx.writeAndFlush(loginRequestMessage);
+                                try {
+                                    waitLogin.await();
+                                } catch (InterruptedException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                            log.debug("received msg {}", msg);
+
+                        }
+                    });
                 }
             });
             ChannelFuture channelFuture = bootstrap.connect(new InetSocketAddress(9999));
