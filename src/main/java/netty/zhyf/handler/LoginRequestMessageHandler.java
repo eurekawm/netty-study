@@ -1,15 +1,15 @@
 package netty.zhyf.handler;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.ChannelHandler.Sharable;
 import lombok.extern.slf4j.Slf4j;
 import netty.zhyf.domain.Session;
 import netty.zhyf.message.LoginRequestMessage;
 import netty.zhyf.message.LoginResponseMessage;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 服务器端用于登录验证的方法
@@ -18,39 +18,45 @@ import netty.zhyf.message.LoginResponseMessage;
 @Sharable
 public class LoginRequestMessageHandler extends SimpleChannelInboundHandler<LoginRequestMessage> {
 
-    private static Map<String, String> DB = new HashMap();
+    private static Map<String, String> userDB = new HashMap<>();
 
     static {
-        DB.put("aa", "123");
-        DB.put("bb", "123");
-        DB.put("cc", "123");
-        DB.put("dd", "123");
+        userDB.put("bb", "123456");
+        userDB.put("suns2", "123456");
+        userDB.put("suns3", "123456");
+        userDB.put("suns4", "123456");
+        userDB.put("suns5", "123456");
     }
 
+    // 服务器端 专门用于进行登录验证的方法
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, LoginRequestMessage msg) throws Exception {
-        log.debug("login method invoke");
-        String uername = msg.getUername();
+        log.debug("login method invoke ....");
+        String username = msg.getUsername();
         String password = msg.getPassword();
-        // 验证
-        if (login(uername, password)) {
-            log.debug("login OK");
-            // 建立服务器端的session
-            Session session = new Session();
-            session.bind(ctx.channel(), uername);
-            ctx.writeAndFlush(new LoginResponseMessage("200", "OK"));
-        } else {
-            log.debug("login ERROR");
-            ctx.writeAndFlush(new LoginResponseMessage("200", "error"));
-        }
 
+        // DB查询 进行用户名 密码验证
+        boolean isLogin = login(username, password);
+        // 如果验证成功
+        // 建立于服务端的Session
+
+        // 如果没有验证成功 登录失败
+        if (isLogin) {
+            log.debug("login is ok....");
+            Session session = new Session();
+            session.bind(ctx.channel(), username);
+            ctx.writeAndFlush(new LoginResponseMessage("200", "Login IS OK"));
+        } else {
+            log.debug("login is error");
+            ctx.writeAndFlush(new LoginResponseMessage("500", "Check you Name or Password"));
+        }
     }
 
     private boolean login(String username, String password) {
-        if (DB.get(username) != null && DB.get(username).equals(password)) {
-            return true;
+        String storePassword = userDB.get(username);
+        if (!password.equals(storePassword)) {
+            return false;
         }
-        return false;
+        return true;
     }
-
 }

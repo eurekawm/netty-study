@@ -11,7 +11,7 @@ import io.netty.channel.Channel;
 public class GroupSession {
 
     // 存储聊天室的信息 key = 聊天室的名字
-    private static final Map<String, Group> groupMap = new HashMap();
+    private static final Map<String, Group> groupMap = new HashMap<>();
 
     /**
      * 创建聊天室

@@ -7,16 +7,11 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.netty.handler.codec.string.StringDecoder;
-
 import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 import netty.zhyf.codec.ChatByteToMessageDecoder;
 import netty.zhyf.codec.ChatMessageToByteEncoder;
-import netty.zhyf.message.ChatRequestMessage;
-import netty.zhyf.message.ChatResponseMessage;
-import netty.zhyf.message.LoginRequestMessage;
-import netty.zhyf.message.LoginResponseMessage;
+import netty.zhyf.handler.LoginRequestMessageHandler;
 
 @Slf4j
 public class MyServer {
@@ -26,7 +21,7 @@ public class MyServer {
         LoggingHandler loggingHandler = new LoggingHandler();
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
-        ChatMessageToByteEncoder chatMessageToByteEncoder = new ChatMessageToByteEncoder();
+        LoginRequestMessageHandler loginRequestMessageHandler = new LoginRequestMessageHandler();
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.channel(NioServerSocketChannel.class);
@@ -36,31 +31,12 @@ public class MyServer {
             bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
             bootstrap.childHandler(new ChannelInitializer<NioSocketChannel>() {
                 @Override
-                protected void initChannel(NioSocketChannel nioSocketChannel) throws Exception {
-                    nioSocketChannel.pipeline().addLast(new LengthFieldBasedFrameDecoder(1024, 7, 4, 0, 0));
-                    nioSocketChannel.pipeline().addLast(loggingHandler);
-                    nioSocketChannel.pipeline().addLast(new ChatByteToMessageDecoder());
-                    nioSocketChannel.pipeline().addLast(chatMessageToByteEncoder);
-                    nioSocketChannel.pipeline().addLast(new SimpleChannelInboundHandler<LoginRequestMessage>() {
-
-                        @Override
-                        protected void channelRead0(ChannelHandlerContext ctx, LoginRequestMessage msg)
-                                throws Exception {
-                            log.info("FDSSSSSSSSS {}", msg);
-                            ctx.writeAndFlush(new LoginResponseMessage("200", "hello"));
-                        }
-
-                    });
-                    nioSocketChannel.pipeline().addLast(new SimpleChannelInboundHandler<ChatRequestMessage>() {
-
-                        @Override
-                        protected void channelRead0(ChannelHandlerContext ctx, ChatRequestMessage msg)
-                                throws Exception {
-                            log.info("FDSSSSSSSSS {}", msg);
-                            ctx.writeAndFlush(new ChatResponseMessage("300", "hello"));
-                        }
-
-                    });
+                protected void initChannel(NioSocketChannel ch) throws Exception {
+                    ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(1024, 7, 4, 0, 0));
+                    ch.pipeline().addLast(loggingHandler);
+                    ch.pipeline().addLast(new ChatByteToMessageDecoder());
+                    ch.pipeline().addLast(new ChatMessageToByteEncoder());
+                    ch.pipeline().addLast(loginRequestMessageHandler);
                 }
             });
             Channel channel = bootstrap.bind(9999).sync().channel();

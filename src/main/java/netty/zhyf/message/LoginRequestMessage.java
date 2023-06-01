@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginRequestMessage extends Message {
-    private String uername;
+    private String username;
     private String password;
 
 
