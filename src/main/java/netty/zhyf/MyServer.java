@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import netty.zhyf.codec.ChatByteToMessageDecoder;
 import netty.zhyf.codec.ChatMessageToByteEncoder;
 import netty.zhyf.handler.ChatRequestMessageHandler;
+import netty.zhyf.handler.GroupCreateRequestMessageHandler;
 import netty.zhyf.handler.LoginRequestMessageHandler;
 
 @Slf4j
@@ -38,6 +39,7 @@ public class MyServer {
                     ch.pipeline().addLast(new ChatMessageToByteEncoder());
                     ch.pipeline().addLast(new LoginRequestMessageHandler());
                     ch.pipeline().addLast(new ChatRequestMessageHandler());
+                    ch.pipeline().addLast(new GroupCreateRequestMessageHandler());
                 }
             });
             Channel channel = bootstrap.bind(9999).sync().channel();

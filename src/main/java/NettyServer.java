@@ -61,7 +61,6 @@ public class NettyServer {
                         key.cancel();
                     }
                 }
-
             }
         }
     }

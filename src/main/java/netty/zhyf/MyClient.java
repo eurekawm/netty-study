@@ -10,14 +10,19 @@ import lombok.extern.slf4j.Slf4j;
 import netty.zhyf.codec.ChatByteToMessageDecoder;
 import netty.zhyf.codec.ChatMessageToByteEncoder;
 import netty.zhyf.message.ChatRequestMessage;
+import netty.zhyf.message.GroupCreateRequstMessage;
 import netty.zhyf.message.LoginRequestMessage;
 import netty.zhyf.message.LoginResponseMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Array;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -79,7 +84,7 @@ public class MyClient {
                                     return;
                                 }
                                 log.info("开始处理命令");
-                                
+
                                 while (true) {
 
                                     System.out.println("=================");
@@ -93,8 +98,15 @@ public class MyClient {
                                     switch (split[0]) {
                                         case "send":
                                             ctx.writeAndFlush(new ChatRequestMessage(username, split[1], split[2]));
+                                            break;
                                         case "gcreate":
-                                            ;
+                                            String goupName = split[1];
+                                            String[] members = split[2].split(",");
+                                            Set<String> memberSet = new HashSet<>(Arrays.asList(members));
+                                            // 群聊用户包括自己自己
+                                            memberSet.add(username);
+                                            ctx.writeAndFlush(new GroupCreateRequstMessage(goupName, memberSet));
+                                            break;
                                         case "gsend":
                                             ;
                                         case "quit":
