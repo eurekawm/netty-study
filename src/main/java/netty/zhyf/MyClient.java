@@ -9,6 +9,7 @@ import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 import netty.zhyf.codec.ChatByteToMessageDecoder;
 import netty.zhyf.codec.ChatMessageToByteEncoder;
+import netty.zhyf.message.ChatRequestMessage;
 import netty.zhyf.message.LoginRequestMessage;
 import netty.zhyf.message.LoginResponseMessage;
 
@@ -42,18 +43,18 @@ public class MyClient {
                     ch.pipeline().addLast(new ChatByteToMessageDecoder());
                     ch.pipeline().addLast(loggingHandler);
                     ch.pipeline().addLast(new ChatMessageToByteEncoder());
-                    ch.pipeline().addLast(new ChannelInboundHandlerAdapter()  {
+                    ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
                         @Override
                         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                             log.debug("recive data {}", msg);
                             if (msg instanceof LoginResponseMessage) {
+                                log.info("收到了消息了 ！ 是LoginResponseMessage");
                                 LoginResponseMessage loginResponseMessage = (LoginResponseMessage) msg;
                                 if (loginResponseMessage.getCode().equals("200")) {
                                     login.set(true);
                                 }
                                 waitLogin.countDown();
                             }
-
 
                         }
 
@@ -77,7 +78,31 @@ public class MyClient {
                                     ctx.channel().close();
                                     return;
                                 }
-                                log.info("如果登陆成功了");
+                                log.info("开始处理命令");
+                                
+                                while (true) {
+
+                                    System.out.println("=================");
+                                    System.out.println("send [username] [content]");
+                                    System.out.println("gcreate [group name] [m1,m2,m3]");
+                                    System.out.println("gsend [group name] [content]");
+                                    System.out.println("quit");
+                                    System.out.println("==================");
+                                    String command = scanner.nextLine();
+                                    String[] split = command.split(" ");
+                                    switch (split[0]) {
+                                        case "send":
+                                            ctx.writeAndFlush(new ChatRequestMessage(username, split[1], split[2]));
+                                        case "gcreate":
+                                            ;
+                                        case "gsend":
+                                            ;
+                                        case "quit":
+                                            ;
+                                    }
+
+                                }
+
                             }, "client UI").start();
 
                         }

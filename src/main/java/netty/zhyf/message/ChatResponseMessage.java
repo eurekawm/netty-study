@@ -11,6 +11,19 @@ import lombok.ToString;
 @NoArgsConstructor
 public class ChatResponseMessage extends AbstractResponseMessage {
 
+    private String from;
+    private String content;
+
+    public ChatResponseMessage(String code, String reason, String content, String from) {
+        super(code, reason);
+        this.content = content;
+        this.from = from;
+    }
+
+    public ChatResponseMessage(String content) {
+        this.content = content;
+    }
+
     public ChatResponseMessage(String code, String reason) {
         super(code, reason);
     }
