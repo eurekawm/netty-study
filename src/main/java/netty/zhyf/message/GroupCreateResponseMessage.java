@@ -7,7 +7,6 @@ import lombok.ToString;
 @ToString
 public class GroupCreateResponseMessage extends AbstractResponseMessage {
 
-
     public GroupCreateResponseMessage() {
     }
 

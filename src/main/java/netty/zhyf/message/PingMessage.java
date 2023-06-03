@@ -1,7 +1,5 @@
 package netty.zhyf.message;
 
-import java.util.Set;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,14 +7,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GroupCreateRequstMessage extends Message {
+public class PingMessage extends Message {
 
-    private String groupName;
-
-    private Set<String> members;
+    private String source;
 
     @Override
     public int getMessageType() {
-        return MessageType.GROUP_CREATE_REQUEST_MESSAGE;
+        return MessageType.PING_MESSAGE;
     }
+
 }
